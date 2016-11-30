@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="永志的个人博客">
+    <meta name="keyword" content="yongzhi blog | 永志的个人博客">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="永志的博客" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        二阶段提交协议｜永志的博客
+        
+    </title>
+
+    <link rel="canonical" href="http://yongzhizhan.github.io/2016/11/28/二阶段提交协议/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('undefined')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    永志的博客
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/Tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+
+<!--only post-->
+
+
+<img class="wechat-title-img" src="/img/post-default.jpg">
+
+
+<style>
+    
+    header.intro-header {
+        background-image: url('/img/post-default.jpg');
+    }
+
+    
+</style>
+
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>二阶段提交协议</h1>
+                    
+                    <span class="meta">
+                         作者 永志
+                        <span>
+                          日期 2016-11-28
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#一致性算法"
+                           title="一致性算法">一致性算法</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            二阶段提交协议
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+                <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在单机的环境中，对资源进行修改，可以使用锁来避免访问冲突问题。但在分布式的环境中，没有分布式锁，无法对资源进行锁定，那么就需要引入一致性算法，解决访问冲突问题。分布式环境下的访问冲突的问题，也可以叫做分布式一致性的问题。</p>
+<p>由于在单机的环境下，可以解决资源访问冲突问题，那么在分布式环境下，通过引入协调者，模拟单机的环境，让请求者面对的是单机环境，如下图所示：</p>
+<p><img src="http://oev1ogkg0.bkt.clouddn.com/16-10-13/60841143.jpg" alt="二阶段算法"></p>
+<p>通过引入协调者，请求者面对的是单台机器，但是分布式的问题仍然存在，只是将问题变为分布式系统内部的问题，由内部解决。</p>
+<h2 id="协商过程"><a href="#协商过程" class="headerlink" title="协商过程"></a>协商过程</h2><p>在系统内部，分为了两层，那么的协商过程，也分为两部分：</p>
+<ol>
+<li>请求者和协调者的协商过程，和单机情况下的协商过程一致，可以通过锁解决资源访问问题。</li>
+<li>协调者和参与者的协商过程，需要引入二阶段提交算法，解决问题</li>
+</ol>
+<p>二阶段提交算法的协商过程：</p>
+<ol>
+<li>第一阶段</li>
+</ol>
+<ul>
+<li>协调者向所有参与者提交任务</li>
+<li>参与者，锁定资源，准备好提交环境，并将任务请求写入redo/undo log中</li>
+<li>参与返回成功/失败给协调者</li>
+</ul>
+<ol>
+<li>第二阶段</li>
+</ol>
+<ul>
+<li>协调者收到所有参与者的返回，结果可能成功，也可能有失败</li>
+<li>全部成功，协调者则向所有参与者，发送提交请求，参与者执行redo log，解锁资源，返回并完成任务</li>
+<li>有失败结果，协调者则向所有参与者，发送回滚请求，参与者执行undo log，解锁资源，返回并完成任务</li>
+</ul>
+<p><img src="http://oev1ogkg0.bkt.clouddn.com/16-10-13/24915055.jpg" alt="二阶段提交算法的协商过程"></p>
+<h2 id="引入新的问题"><a href="#引入新的问题" class="headerlink" title="引入新的问题"></a>引入新的问题</h2><p>利用二阶段提交来解决资源访问冲突的问题，会引入一些新的问题：</p>
+<ol>
+<li>在阶段一中，一旦有参与者没响应，会阻塞整体流程，影响到其他参与者</li>
+<li>当协调者发送commit请求后，有参与者没返回消息，此时需要通过协调者识别超时，将参与从集群中剔除</li>
+<li>当参与者锁定资源，返回成功/失败后，协调者没响应，所有参与者不能做什么好的处理，处于不知道是否提交还是回滚的状态</li>
+</ol>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>为了解决参与者锁定资源，协调者没有响应的情况，引入三阶段提交协议：</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/en/3/39/Three-phase_commit_diagram.png" alt="三阶段提交协议"></p>
+<p>相对于二阶段提交协议，三阶段提交协议分为、canCommit、preCommit、doCommit。三阶段提交，要满足一致性，需要约定不会出现<b>网络分区的情况</b>，机器之间消息不通，只能是因为机器挂了导致的。</p>
+<p>这样，可以通过分情况来分析，是否已经解决二阶段提交的问题：</p>
+<ol>
+<li><p>当参与者没有收到preCommit：</p>
+<ul>
+<li>参与者超时，进行回滚操作</li>
+<li>协调者不会收到参与者在preCommit的响应</li>
+<li>协调者收集不齐响应，会发送回滚给其他参与者，让数据一致</li>
+<li>协调者将这个异常的参与剔除出集群中</li>
+</ul>
+</li>
+<li><p>当参与者收到preCommit：</p>
+<ul>
+<li><p>响应给协调者，收到commit/rollback消息</p>
+<ul>
+<li>直接提交结果</li>
+</ul>
+</li>
+<li><p>如果超时，表示协调者挂了</p>
+<ul>
+<li>协调者不会发送commit/rollback消息</li>
+<li>参与会由于preCommit超时，直接提交</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>三阶段提交协议，是可以解决一直性的问题，但是前提是不能出现分区的情况。</p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>无论二阶段提交还是三阶段提交，都是一种折中方案，解决了问题，也会引入一些新的问题，这就需要按照实际情况进行权衡，一致性问题，还能够通过Paxos算法解决，后续再分析。</p>
+
+                <hr>
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                     style="text-align: right"
+                     data-thread-key="2016/11/28/二阶段提交协议/"
+                     data-title="二阶段提交协议"
+                     data-url="http://yongzhizhan.github.io/2016/11/28/二阶段提交协议/"
+                     data-images="http://yongzhizhan.github.io/2016/11/28/二阶段提交协议//img/post-default.jpg"
+                     data-content="问题描述在单机的环境中，对资源进行修改，可以使用锁来避免访问冲突问题。但在分布式的环境中，没有... | 永志的博客 ">
+                    <div class="ds-share-inline">
+                        <ul class="ds-share-icons-16">
+                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                        </ul>
+                        <div class="ds-share-icons-more">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/11/28/使用bandwagonhost和ShadowSock翻墙上网/" data-toggle="tooltip" data-placement="top"
+                           title="使用bandwagonhost和ShadowSock翻墙上网">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/11/28/朋友圈9图切割工具/" data-toggle="tooltip" data-placement="top"
+                           title="朋友圈9图切割工具">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                         data-thread-key="2016/11/28/二阶段提交协议/"
+                         data-title="二阶段提交协议"
+                         data-url="http://yongzhizhan.github.io/2016/11/28/二阶段提交协议/">
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col">
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题描述"><span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#协商过程"><span class="toc-text">协商过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引入新的问题"><span class="toc-text">引入新的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决办法"><span class="toc-text">解决办法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结尾"><span class="toc-text">结尾</span></a></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5 class="text-center">
+                        <a href="/tags/">FEATURED TAGS</a>
+                    </h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#一致性算法"
+                           title="一致性算法">一致性算法</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'yongzhizhan';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user};
+    (function () {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';
+        ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zhanyongzhi">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/yongzhizhan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/yongzhizhan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 永志的博客 2016
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    <!--Theme by <a href="https://haojen.github.io/">Haojen Ma</a>-->
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://yongzhizhan.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-86397613-1', 'auto');
+      ga('send', 'pageview');
+
+</script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="/img/avatar.png">
+</body>
+
+</html>

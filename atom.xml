@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>永志的博客</title>
+  <subtitle>君子生非异也，善假于物也.</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yongzhizhan.github.io/"/>
+  <updated>2016-11-30T00:30:58.129Z</updated>
+  <id>http://yongzhizhan.github.io/</id>
+  
+  <author>
+    <name>永志</name>
+    <email>yongzhizhan@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用github作为maven仓库</title>
+    <link href="http://yongzhizhan.github.io/2016/11/30/%E4%BD%BF%E7%94%A8github%E4%BD%9C%E4%B8%BAmaven%E4%BB%93%E5%BA%93/"/>
+    <id>http://yongzhizhan.github.io/2016/11/30/使用github作为maven仓库/</id>
+    <published>2016-11-30T00:32:49.313Z</published>
+    <updated>2016-11-30T00:30:58.129Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="部署思路"><a href="#部署思路" class="headerlink" title="部署思路"></a>部署思路</h2><ol>
+<li>将项目打包，发布到本地</li>
+<li>将本地的包发布到github的mvn-repo分支中</li>
+</ol>
+<h2 id="操作流程"><a href="#操作流程" class="headerlink" title="操作流程"></a>操作流程</h2><ol>
+<li><p>将项目发布到target下的mvn-repo目录：</p>
+<pre><code>&lt;plugin&gt;
+    &lt;artifactId&gt;maven-deploy-plugin&lt;/artifactId&gt;
+    &lt;version&gt;2.8.1&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;altDeploymentRepository&gt;internal.repo::default::file://${project.build.directory}/mvn-repo&lt;/altDeploymentRepository&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt; 
+</code></pre></li>
+<li><p>配置maven配置文件，增加github的登录信息：</p>
+<pre><code>&lt;server&gt;
+    &lt;id&gt;github&lt;/id&gt;
+    &lt;username&gt;你在github的帐号&lt;/username&gt;
+    &lt;password&gt;你在github的用户名&lt;/password&gt;
+&lt;/server&gt;
+</code></pre></li>
+<li><p>配置发布到github的插件</p>
+<pre><code>&lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+
+    &lt;!-- github server corresponds to entry in ~/.m2/settings.xml --&gt;
+    &lt;github.global.server&gt;github&lt;/github.global.server&gt;
+    &lt;repo.name&gt;archetypes&lt;/repo.name&gt;
+    &lt;repo.owner&gt;yongzhizhan&lt;/repo.owner&gt;
+&lt;/properties&gt;
+</code></pre></li>
+</ol>
+<pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;com.github.github&lt;/groupId&gt;
+    &lt;artifactId&gt;site-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;0.12&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;message&gt;Maven artifacts for ${project.version}&lt;/message&gt;  &lt;!-- git commit message --&gt;
+        &lt;noJekyll&gt;true&lt;/noJekyll&gt;                                  &lt;!-- disable webpage processing --&gt;
+        &lt;outputDirectory&gt;${project.build.directory}/mvn-repo&lt;/outputDirectory&gt; &lt;!-- matches distribution management repository url above --&gt;
+        &lt;branch&gt;refs/heads/mvn-repo&lt;/branch&gt;                       &lt;!-- remote branch name --&gt;
+        &lt;includes&gt;
+            &lt;include&gt;**/*&lt;/include&gt;
+        &lt;/includes&gt;
+        &lt;repositoryName&gt;${repo.name}&lt;/repositoryName&gt;      &lt;!-- github repo name --&gt;
+        &lt;repositoryOwner&gt;${repo.owner}&lt;/repositoryOwner&gt;    &lt;!-- github username --&gt;
+    &lt;/configuration&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;goals&gt;
+                &lt;goal&gt;site&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;phase&gt;deploy&lt;/phase&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;
+</code></pre><h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>在其他项目中，要使用发布的包，需要先填写好仓库地址：</p>
+<pre><code>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;archetypes-webapp&lt;/id&gt;
+        &lt;url&gt;https://github.com/yongzhizhan/archetypes/tree/mvn-repo&lt;/url&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+            &lt;updatePolicy&gt;always&lt;/updatePolicy&gt;
+        &lt;/snapshots&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
+</code></pre><h2 id="演示地址"><a href="#演示地址" class="headerlink" title="演示地址"></a>演示地址</h2><p><a href="https://github.com/yongzhizhan/archetypes" target="_blank" rel="external">当前发布的仓库</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;部署思路&quot;&gt;&lt;a href=&quot;#部署思路&quot; class=&quot;headerlink&quot; title=&quot;部署思路&quot;&gt;&lt;/a&gt;部署思路&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;将项目打包，发布到本地&lt;/li&gt;
+&lt;li&gt;将本地的包发布到github的mvn-repo分支中&lt;/li&gt;
+&lt;/o
+    
+    </summary>
+    
+    
+      <category term="运维" scheme="http://yongzhizhan.github.io/tags/%E8%BF%90%E7%BB%B4/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用bandwagonhost和ShadowSock翻墙上网</title>
+    <link href="http://yongzhizhan.github.io/2016/11/28/%E4%BD%BF%E7%94%A8bandwagonhost%E5%92%8CShadowSock%E7%BF%BB%E5%A2%99%E4%B8%8A%E7%BD%91/"/>
+    <id>http://yongzhizhan.github.io/2016/11/28/使用bandwagonhost和ShadowSock翻墙上网/</id>
+    <published>2016-11-28T02:36:08.479Z</published>
+    <updated>2016-11-28T02:36:08.479Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>之前翻墙，用的VPS，速度还是有点难受，想着尝试一下新的VPS，看看能不能提高一下速度，选择了bandwagonhost + ShadowSock进行翻墙。这里对过程记录一下，之后续费、维护时不至于忘记了。</p>
+<h2 id="搬瓦工网站记录"><a href="#搬瓦工网站记录" class="headerlink" title="搬瓦工网站记录"></a>搬瓦工网站记录</h2><p>网站地址：</p>
+<pre><code>https://bandwagonhost.com
+</code></pre><p>在上面直接购买和维护就好了，但是有几点要注意：</p>
+<ul>
+<li>默认ssh端口，不是22，需要在控制面板中查看</li>
+<li>使用优惠码，可以有折扣</li>
+</ul>
+<h2 id="Shadowsocks"><a href="#Shadowsocks" class="headerlink" title="Shadowsocks"></a>Shadowsocks</h2><p>安装Shadowsocks，分为客户端和服务端，服务端安装：</p>
+<pre><code>apt-get update
+apt-get install -y python-pip
+pip install shadowsocks
+ssserver -p 1988 -k [自定义密码] -m aes-256-cfb --user nobody -d start
+</code></pre><p>客户端安装，百度云盘的下载地址：</p>
+<pre><code>https://pan.baidu.com/share/link?uk=3037603930&amp;shareid=3694572822&amp;adapt=pc&amp;fr=ftw
+</code></pre><h2 id="使用net-speeder，加速Shadowsocks"><a href="#使用net-speeder，加速Shadowsocks" class="headerlink" title="使用net-speeder，加速Shadowsocks"></a>使用net-speeder，加速Shadowsocks</h2><p>为了解决丢包问题，最简单粗暴的方法就是双倍发送，即同一份数据包发送两份。这样的话在服务器带宽充足情况下，丢包率会平方级降低。<br>直接优点是降低丢包率，直接缺点是耗费双倍流量。一些延伸影响是更容易触发快速恢复逻辑，避免了丢包时窗口缩减过快。一定程度也能提高网络速度。</p>
+<p>ubuntu的安装命令：</p>
+<pre><code>shell wget --no-check-certificate https://raw.githubusercontent.com/tennfy/debian_netspeeder_tennfy/master/debian_netspeeder_tennfy.sh
+chmod a+x debian_netspeeder_tennfy.sh
+bash debian_netspeeder_tennfy.sh
+</code></pre><p>启动命令：</p>
+<pre><code>nohup /usr/local/net_speeder/net_speeder venet0 &quot;ip&quot; &gt;/dev/null 2&gt;&amp;1 &amp;
+</code></pre><h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>搭建好后，尝试了一下，用这个方案来上网，速度比之前提高了不少，主要是VPS的速度有了提高。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;p&gt;之前翻墙，用的VPS，速度还是有点难受，想着尝试一下新的VPS，看看能不能提高一下速度，选择了bandwagonhost + ShadowS
+    
+    </summary>
+    
+    
+      <category term="运维" scheme="http://yongzhizhan.github.io/tags/%E8%BF%90%E7%BB%B4/"/>
+    
+      <category term="备忘" scheme="http://yongzhizhan.github.io/tags/%E5%A4%87%E5%BF%98/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>二阶段提交协议</title>
+    <link href="http://yongzhizhan.github.io/2016/11/28/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4%E5%8D%8F%E8%AE%AE/"/>
+    <id>http://yongzhizhan.github.io/2016/11/28/二阶段提交协议/</id>
+    <published>2016-11-28T02:36:08.479Z</published>
+    <updated>2016-11-28T02:36:08.479Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在单机的环境中，对资源进行修改，可以使用锁来避免访问冲突问题。但在分布式的环境中，没有分布式锁，无法对资源进行锁定，那么就需要引入一致性算法，解决访问冲突问题。分布式环境下的访问冲突的问题，也可以叫做分布式一致性的问题。</p>
+<p>由于在单机的环境下，可以解决资源访问冲突问题，那么在分布式环境下，通过引入协调者，模拟单机的环境，让请求者面对的是单机环境，如下图所示：</p>
+<p><img src="http://oev1ogkg0.bkt.clouddn.com/16-10-13/60841143.jpg" alt="二阶段算法"></p>
+<p>通过引入协调者，请求者面对的是单台机器，但是分布式的问题仍然存在，只是将问题变为分布式系统内部的问题，由内部解决。</p>
+<h2 id="协商过程"><a href="#协商过程" class="headerlink" title="协商过程"></a>协商过程</h2><p>在系统内部，分为了两层，那么的协商过程，也分为两部分：</p>
+<ol>
+<li>请求者和协调者的协商过程，和单机情况下的协商过程一致，可以通过锁解决资源访问问题。</li>
+<li>协调者和参与者的协商过程，需要引入二阶段提交算法，解决问题</li>
+</ol>
+<p>二阶段提交算法的协商过程：</p>
+<ol>
+<li>第一阶段</li>
+</ol>
+<ul>
+<li>协调者向所有参与者提交任务</li>
+<li>参与者，锁定资源，准备好提交环境，并将任务请求写入redo/undo log中</li>
+<li>参与返回成功/失败给协调者</li>
+</ul>
+<ol>
+<li>第二阶段</li>
+</ol>
+<ul>
+<li>协调者收到所有参与者的返回，结果可能成功，也可能有失败</li>
+<li>全部成功，协调者则向所有参与者，发送提交请求，参与者执行redo log，解锁资源，返回并完成任务</li>
+<li>有失败结果，协调者则向所有参与者，发送回滚请求，参与者执行undo log，解锁资源，返回并完成任务</li>
+</ul>
+<p><img src="http://oev1ogkg0.bkt.clouddn.com/16-10-13/24915055.jpg" alt="二阶段提交算法的协商过程"></p>
+<h2 id="引入新的问题"><a href="#引入新的问题" class="headerlink" title="引入新的问题"></a>引入新的问题</h2><p>利用二阶段提交来解决资源访问冲突的问题，会引入一些新的问题：</p>
+<ol>
+<li>在阶段一中，一旦有参与者没响应，会阻塞整体流程，影响到其他参与者</li>
+<li>当协调者发送commit请求后，有参与者没返回消息，此时需要通过协调者识别超时，将参与从集群中剔除</li>
+<li>当参与者锁定资源，返回成功/失败后，协调者没响应，所有参与者不能做什么好的处理，处于不知道是否提交还是回滚的状态</li>
+</ol>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>为了解决参与者锁定资源，协调者没有响应的情况，引入三阶段提交协议：</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/en/3/39/Three-phase_commit_diagram.png" alt="三阶段提交协议"></p>
+<p>相对于二阶段提交协议，三阶段提交协议分为、canCommit、preCommit、doCommit。三阶段提交，要满足一致性，需要约定不会出现<b>网络分区的情况</b>，机器之间消息不通，只能是因为机器挂了导致的。</p>
+<p>这样，可以通过分情况来分析，是否已经解决二阶段提交的问题：</p>
+<ol>
+<li><p>当参与者没有收到preCommit：</p>
+<ul>
+<li>参与者超时，进行回滚操作</li>
+<li>协调者不会收到参与者在preCommit的响应</li>
+<li>协调者收集不齐响应，会发送回滚给其他参与者，让数据一致</li>
+<li>协调者将这个异常的参与剔除出集群中</li>
+</ul>
+</li>
+<li><p>当参与者收到preCommit：</p>
+<ul>
+<li><p>响应给协调者，收到commit/rollback消息</p>
+<ul>
+<li>直接提交结果</li>
+</ul>
+</li>
+<li><p>如果超时，表示协调者挂了</p>
+<ul>
+<li>协调者不会发送commit/rollback消息</li>
+<li>参与会由于preCommit超时，直接提交</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>三阶段提交协议，是可以解决一直性的问题，但是前提是不能出现分区的情况。</p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>无论二阶段提交还是三阶段提交，都是一种折中方案，解决了问题，也会引入一些新的问题，这就需要按照实际情况进行权衡，一致性问题，还能够通过Paxos算法解决，后续再分析。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h2&gt;&lt;p&gt;在单机的环境中，对资源进行修改，可以使用锁来避免访问冲突问题。但在分布式的环境中，没有分布式锁，无法对资源进行锁定，那么就需
+    
+    </summary>
+    
+    
+      <category term="一致性算法" scheme="http://yongzhizhan.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>朋友圈9图切割工具</title>
+    <link href="http://yongzhizhan.github.io/2016/11/28/%E6%9C%8B%E5%8F%8B%E5%9C%889%E5%9B%BE%E5%88%87%E5%89%B2%E5%B7%A5%E5%85%B7/"/>
+    <id>http://yongzhizhan.github.io/2016/11/28/朋友圈9图切割工具/</id>
+    <published>2016-11-28T02:36:08.479Z</published>
+    <updated>2016-11-28T02:36:08.480Z</updated>
+    
+    <content type="html"><![CDATA[<p>发朋友圈时，都喜欢发9张图，这样会显得内容丰满，那我们想发图，但只有一张，那是不是太单薄了点呢，这样可以用这个9图工具，可以将一张图片分成9张来发朋友圈，只需要将图片粘贴到网页就可以了，连Photoshop都不用打开。</p>
+<h2 id="效果图："><a href="#效果图：" class="headerlink" title="效果图："></a>效果图：</h2><p>在线查看：<a href="http://zhanyongzhi.cn/demo/9pic/index.html" target="_blank" rel="external">demo</a></p>
+<p><img src="http://oev1ogkg0.bkt.clouddn.com/16-10-26/67463025.jpg" alt="效果图"></p>
+<h2 id="显示代码"><a href="#显示代码" class="headerlink" title="显示代码"></a>显示代码</h2><p>也可以在github中查看：<a href="https://github.com/yongzhizhan/draftbox/blob/master/tools/9pic/index.html" target="_blank" rel="external">https://github.com/yongzhizhan</a></p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+      &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=Edge&quot;&gt;
+      &lt;title&gt;9图切割&lt;/title&gt;
+
+      &lt;script type=&quot;text/javascript&quot; src=&quot;http://oev1ogkg0.bkt.clouddn.com/16-10-23/55592235-jquery-3.1.1.min.js&quot;&gt;&lt;/script&gt;
+      &lt;script type=&quot;text/javascript&quot; src=&quot;paste.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;style&gt;
+    .splitPic{
+        border: none;
+        margin: 1px;
+        padding: 0px;
+        float: left;
+    }
+
+    .split_target{
+        margin: 0px;
+        padding: 0px;
+    }
+&lt;/style&gt;
+&lt;body&gt;
+朋友圈9图脚本，请将图片粘贴到网页中
+&lt;canvas style=&quot;border:1px solid grey;display:none;&quot; id=&quot;pastePic&quot; width=&quot;300&quot; height=&quot;300&quot;&gt;&lt;/canvas&gt;
+&lt;img id=&quot;pic&quot; src=&quot;img_the_scream.jpg&quot; alt=&quot;pic&quot; style=&quot;display:none;&quot;&gt;
+&lt;canvas id=&quot;canvas&quot; style=&quot;display:none;&quot;&gt;
+Your browser does not support the HTML5 canvas tag.
+&lt;/canvas&gt;
+&lt;div id=&quot;split_target&quot; class=&quot;split_target&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+
+function splitPic(){
+    var pic = $(&quot;#pic&quot;);
+    var picWidth = pic.width();
+    var picHeight = pic.height();
+
+    var target = $(&quot;#split_target&quot;);
+    target.width(picWidth + 6);
+
+    var pieceWidht = Math.floor(picWidth / 3);
+    var pieceHeight = Math.floor(picHeight / 3);
+
+    var canvas = document.getElementById(&quot;canvas&quot;);
+    var ctx = canvas.getContext(&quot;2d&quot;);
+
+    ctx.canvas.width = pieceWidht;
+    ctx.canvas.height = pieceHeight;
+
+    for(var i=1; i&lt;=9; i++){
+        var xPos = Math.floor((i + 2) % 3) * pieceWidht;
+        var yPos = Math.floor((i - 1) / 3) * pieceHeight;
+
+        console.info(&quot;(&quot; + xPos + &quot;,&quot; + yPos + &quot;)&quot;);
+
+        ctx.drawImage(pic.get(0), xPos, yPos, pieceWidht, pieceHeight, 0, 0, pieceWidht, pieceHeight);
+
+        var dataURL = canvas.toDataURL();
+        var test = $(&apos;&lt;img class=&quot;splitPic&quot;&gt;&apos;);
+        test.attr(&apos;src&apos;, dataURL);
+        test.height(pieceHeight);
+        test.width(pieceWidht);
+
+        test.appendTo(target);
+
+        //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+$(document).ready(function(){
+    var CLIPBOARD = new CLIPBOARD_CLASS(&quot;pastePic&quot;, true, function(dataUrl){
+        $(&quot;#split_target&quot;).empty();
+        var pic = $(&quot;#pic&quot;);
+        pic.attr(&quot;src&quot;, dataUrl);
+        splitPic();    
+    });
+
+});
+
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h2 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h2><ul>
+<li>将多图合并，生成9张图</li>
+<li>支持拖入生成</li>
+</ul>
+<p>当然，这是要有人用，而且效果好的时候才改进</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;发朋友圈时，都喜欢发9张图，这样会显得内容丰满，那我们想发图，但只有一张，那是不是太单薄了点呢，这样可以用这个9图工具，可以将一张图片分成9张来发朋友圈，只需要将图片粘贴到网页就可以了，连Photoshop都不用打开。&lt;/p&gt;
+&lt;h2 id=&quot;效果图：&quot;&gt;&lt;a href=&quot;
+    
+    </summary>
+    
+    
+      <category term="有趣的工具" scheme="http://yongzhizhan.github.io/tags/%E6%9C%89%E8%B6%A3%E7%9A%84%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>4种缓存策略</title>
+    <link href="http://yongzhizhan.github.io/2016/11/28/4%E7%A7%8D%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5/"/>
+    <id>http://yongzhizhan.github.io/2016/11/28/4种缓存策略/</id>
+    <published>2016-11-28T02:36:08.478Z</published>
+    <updated>2016-11-28T02:36:08.478Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>一般的系统里面，都需要对缓存进行处理，一般用到的策略，会有下面几种，cache aside, cache write through，cache read through, cache behide，下面对这几种策略梳理，积累知识。</p>
+<h2 id="假设"><a href="#假设" class="headerlink" title="假设"></a>假设</h2><p>先假设一些使用条件，便于描述：</p>
+<ol>
+<li>系统划分为，缓存服务器和数据库服务器，分别在不同的机器中</li>
+<li>缓存系统，需要同步数据库服务器里面的数据</li>
+<li>更新的内容，需要写入到数据库服务器</li>
+</ol>
+<h2 id="cache-aside"><a href="#cache-aside" class="headerlink" title="cache aside"></a>cache aside</h2><p>使用旁路操作缓存，在读、写的操作，操作情况如下：</p>
+<ol>
+<li>读取：当缓存没有数据，先从数据库读取，写入到缓存中，然后返回，否则直接返回缓存里面的数据</li>
+<li>写入：先写入数据库，然后设置缓存失效，返回数据</li>
+</ol>
+<p>这样操作，跨了两台服务器进行，会有一些同步问题，导致脏数据出现：</p>
+<ol>
+<li>A读取数据库data0</li>
+<li>B写入数据库data1</li>
+<li>B设置缓存失效</li>
+<li>A写入缓存data0</li>
+</ol>
+<p>这样会使得缓存里面存储的是脏数据，此时，可以通过设置缓存的过期时间，让数据恢复一致。</p>
+<blockquote>
+<p>如果用分布式锁，对两步操作进行同步，只是这样的代价比较高。</p>
+</blockquote>
+<h2 id="cache-read-write-through"><a href="#cache-read-write-through" class="headerlink" title="cache read/write through"></a>cache read/write through</h2><p>直接读/写缓存，将读取和写入的操作，集成到缓存服务器内部，将操作进行同步了，分别是：</p>
+<ol>
+<li>读取：当缓存没有数据，锁定缓存，再检查缓存，从数据库读取内容，写入到缓存中，然后解锁，返回</li>
+<li>读取：当缓存有数据，直接返回缓存里面的数据</li>
+<li>写入：锁定缓存，写入数据库，再更新本地缓存，解锁</li>
+</ol>
+<p>这样的情况下，就可以避免脏数据的出现了。下面，对写入时，机器失效的情况进行考虑：</p>
+<ol>
+<li>写入缓存失败，不会写入到数据中</li>
+<li>写入数据库失败，丢弃缓存数据</li>
+</ol>
+<p>这样也不会导致脏数据的出现。</p>
+<h2 id="cache-behide"><a href="#cache-behide" class="headerlink" title="cache behide"></a>cache behide</h2><p>异步的进行同步缓存，读取和写入都是直接对缓存进行操作，然后异步的读取缓存数据，同步到数据库中，这样可以将多次提交的数据，打包进行更新，可以更加高效，不过，由于同步有时间空隙，会使得机器故障时，丢失部分数据。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="http://coolshell.cn/articles/17416.html" target="_blank" rel="external">缓存更新的套路</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;p&gt;一般的系统里面，都需要对缓存进行处理，一般用到的策略，会有下面几种，cache aside, cache write through，cac
+    
+    </summary>
+    
+    
+      <category term="缓存" scheme="http://yongzhizhan.github.io/tags/%E7%BC%93%E5%AD%98/"/>
+    
+  </entry>
+  
+</feed>
